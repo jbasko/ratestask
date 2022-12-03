@@ -19,8 +19,13 @@ class RatesRequest(BaseModel):
     def validate_dates(cls, values):
         date_from = values.get("date_from")
         date_to = values.get("date_to")
+
         if date_from and date_to and date_from > date_to:
             raise ValueError("date_from must be less than date_to")
+
+        if date_from and date_to and (date_to - date_from).days > 100:
+            raise ValueError("date range must be no more than 100 days")
+
         return values
 
 

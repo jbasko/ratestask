@@ -11,6 +11,7 @@ EXAMPLE_POINTS = {
     {"date_from": "2016-23-01", "date_to": "2016-29-01", **EXAMPLE_POINTS},  # invalid format
     {"date_from": "2016-01-10", "date_to": "2016-01-01", **EXAMPLE_POINTS},  # date_from > date_to
     {"date_from": "2017-01-01", "date_to": "2017-02-29", **EXAMPLE_POINTS},  # not leap year
+    {"date_from": "2016-01-01", "date_to": "2016-06-01", **EXAMPLE_POINTS},  # too long range
 ])
 def test_handles_bad_dates(client, payload):
     resp = client.get("/rates", query_string=payload)
