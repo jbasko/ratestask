@@ -4,7 +4,7 @@ from flask import Blueprint
 from flask_pydantic import validate
 from pydantic import BaseModel, root_validator
 
-from ratestask.domain.points import get_points
+from ratestask.domain.points import get_points, Point
 from ratestask.domain.rates import iter_average_rate_by_day
 from ratestask.exceptions import BadRequest
 
@@ -34,26 +34,29 @@ class RatesRequest(BaseModel):
 @rates.route("/rates", methods=["GET"])
 @validate()
 def get_rates(query: RatesRequest):
-    if query.origin == query.destination:
-        raise BadRequest("origin and destination must be different", loc="origin")
-
     points = get_points({
         "origin": query.origin,
         "destination": query.destination,
     })
 
-    if not points["origin"]:
+    origin = points["origin"]
+    destination = points["destination"]
+
+    if not origin:
         raise BadRequest("origin point does not exist", loc="origin")
 
-    if not points["destination"]:
+    if not destination:
         raise BadRequest("destination point does not exist", loc="destination")
+
+    if origin.is_port and destination.is_port and origin.code == destination.code:
+        raise BadRequest("origin and destination cannot both be the same port", loc="origin")
 
     return [
         {"day": day.strftime("%Y-%m-%d"), "average_price": average_price}
         for day, average_price in iter_average_rate_by_day(
             date_from=query.date_from,
             date_to=query.date_to,
-            origin=query.origin,
-            destination=query.destination,
+            origin=origin,
+            destination=destination,
         )
     ]

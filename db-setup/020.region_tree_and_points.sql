@@ -18,10 +18,10 @@ MATERIALIZED VIEW region_tree AS (
 -- points: A union of ports and regions treated as analogous entities with a code and a path.
 CREATE
 MATERIALIZED VIEW points AS (
-        SELECT po.code AS code, po.code || rt.path AS path
+        SELECT po.code AS code, po.code || rt.path AS path, 'port' AS kind
         FROM ports po
         LEFT JOIN region_tree rt ON po.parent_slug = rt.slug
     UNION ALL
-        SELECT rt.slug AS code, rt.path AS path
+        SELECT rt.slug AS code, rt.path AS path, 'region' AS kind
         FROM region_tree rt
 );

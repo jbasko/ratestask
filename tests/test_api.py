@@ -43,12 +43,45 @@ def test_errs_on_nonexistent_points(client):
     assert resp.status_code == 400
 
 
-def test_errs_on_same_origin_and_destination(client):
-    resp = client.get("/rates?date_from=2016-01-01&date_to=2016-01-10&origin=CNSGH&destination=CNSGH")
+def test_errs_on_same_origin_and_destination_port(client):
+    resp = client.get("/rates?date_from=2016-01-01&date_to=2016-01-10&origin=LVRIX&destination=LVRIX")
     assert resp.status_code == 400
 
 
-def test_errs_on_origin_within_destination(client):
-    # TODO Can this be valid? It would have to be any point within destination region that is not the origin?
-    resp = client.get("/rates?date_from=2016-01-01&date_to=2016-01-10&origin=CNSGH&destination=china_main")
-    assert resp.status_code == 400
+def test_no_error_on_same_origin_and_destination_region(client):
+    resp = client.get("/rates?date_from=2016-01-01&date_to=2016-01-10&origin=baltic&destination=baltic")
+    assert resp.status_code == 200
+
+
+def test_origin_within_destination(client):
+    """
+    [CAVEAT-01]
+    baltic_main -> baltic
+
+    Contributing prices (from 015.dummy_latvian_data.sql) are:
+
+    LVVEN	FIHEL	2016-01-01	800
+    LVVEN	FIRAU	2016-01-01	850
+    LVVEN	FIKTK	2016-01-01	875
+    LVLPX	FIHEL	2016-01-01	820
+    LVLPX	FIRAU	2016-01-01	810
+    LVLPX	FIKTK	2016-01-01	880
+
+    These prices do NOT contribute:
+
+    LVVEN	LVLPX	2016-01-01	300
+    LVVEN	LVRIX	2016-01-01	350
+    LVLPX	LVRIX	2016-01-01	600
+    """
+    resp = client.get("/rates?date_from=2016-01-01&date_to=2016-01-01&origin=baltic_main&destination=baltic")
+    assert resp.status_code == 200
+
+    body = resp.json
+    assert body[0]["average_price"] == 839
+
+    # Nothing in reverse as no prices given at all
+    resp = client.get("/rates?date_from=2016-01-01&date_to=2016-01-01&origin=baltic&destination=baltic_main")
+    assert resp.status_code == 200
+
+    body = resp.json
+    assert body[0]["average_price"] is None

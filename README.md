@@ -43,3 +43,21 @@ docker exec ratestask-api python -m ratestask.scripts.update_views
  * Proper logging.
  * Stricter requirements.txt with versions pinned.
  * Materialized view refresh on some sort of schedule or an event.
+
+## Caveats
+
+A couple of assumptions were made:
+
+ * Rate `(A, A)` for port `A` is not defined (raises error).
+ * Rate `(b, b)` for region `b` is defined as the average of any prices
+   between ports `(X, Y)` where both `X` and `Y` belong to `b` or one of its subregions.
+   This was done so that the subregions can be compared to each other.
+ * Rate `(s, t)` for regions `s` and `t` such that `s` is a subregion of `t` is defined
+   as the average of all prices between `(X, Y)` such that:
+   * `X` belongs to `s` or one of its subregions. 
+   * `Y` belongs to `t`, but does not belong to `s`.
+
+For example, `LVVEN` (`baltic_main`) to `LVLPX` (`baltic_main`) contributes to the rate
+of `(baltic_main, baltic_main)`, but it does not contribute to the rate of
+`(baltic_main, baltic)`. Meanwhile `LVVEN` to `FIHEL` (`finland_main`) contributes as
+`finland_main` is a subregion of `baltic`. Code dealing with this is marked with `[CAVEAT-01]`.
