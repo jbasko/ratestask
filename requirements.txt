@@ -1,0 +1,4 @@
+Flask
+pydantic
+Flask-Pydantic
+psycopg2-binary
