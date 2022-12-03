@@ -34,7 +34,10 @@ def iter_average_rate_by_day(date_from: dt.date, date_to: dt.date, origin: str, 
             "destination": destination,
         })
 
-        by_dates = {r[0]: r for r in conn.fetchall()}
+        by_dates = {
+            r[0]: int(r[1]) if r[1] else None
+            for r in conn.fetchall()
+        }
 
         for d in dates_range:
-            yield d, by_dates.get(d, (None, None))[1]
+            yield d, by_dates.get(d, None)
