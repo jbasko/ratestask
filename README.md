@@ -1,5 +1,13 @@
 # ratestask
 
+## Solution
+
+Two Docker containers are used to demonstrate the solution. The prescribed `db` container and
+and an `api` container running a Flask app.
+
+The core tree structure resolution logic lives in PostgreSQL as two materialized views which
+require manual refresh upon data change.
+
 ## Usage
 
 Build Docker images for `api` and `db` and launch containers:
@@ -7,6 +15,9 @@ Build Docker images for `api` and `db` and launch containers:
 ```bash
 docker-compose build && docker-compose up
 ```
+
+The API is then available at `http://127.0.0.1:5000/rates`.
+Try it out at [http://127.0.0.1:5000/rates?date_from=2016-01-01&date_to=2016-01-10&origin=CNSGH&destination=north_europe_main](http://127.0.0.1:5000/rates?date_from=2016-01-01&date_to=2016-01-10&origin=CNSGH&destination=north_europe_main).
 
 Run tests in Docker:
 
