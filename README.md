@@ -4,20 +4,20 @@
 
 Build Docker images for `api` and `db` and launch containers:
 
-  ```bash
-  docker-compose build && docker-compose up
-  ```
+```bash
+docker-compose build && docker-compose up
+```
 
 Run tests in Docker:
 
-  ```bash
-  docker exec ratestask-api python -m pytest
-  ```
+```bash
+docker exec ratestask-api python -m pytest
+```
 
 ## Running Locally
 
 This assumes you use `pyenv` for local virtual environment management,
-some kind of `.env` file handling for environment variables,
+some kind of environment variable management setup (e.g. `direnv`),
 and this is all properly set up in your shell.
 
  1. Create a virtual environment: `pyenv virtualenv 3.10.3 ratestask`
@@ -27,8 +27,19 @@ and this is all properly set up in your shell.
  5. Run the tests: `pytest`
  6. Start the app: `flask run`
 
+## Updating Materialized Views
+
+The app uses `region_trees` and `points` materialised views.
+These are not updated automatically. To do that, run:
+
+```bash
+docker exec ratestask-api python -m ratestask.scripts.update_views
+```
+
 ## Things Not Implemented
 
  * In production, you would want to run the app in a WSGI server like Gunicorn.
  * Proper DB migrations.
  * Proper logging.
+ * Stricter requirements.txt with versions pinned.
+ * Materialized view refresh on some sort of schedule or an event.
