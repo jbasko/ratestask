@@ -37,3 +37,7 @@ def test_gets_example_rates(client):
     assert body[9]["day"] == "2016-01-10"
     assert body[9]["average_price"] == 1124
 
+
+def test_nonexistent_points(client):
+    resp = client.get("/rates?date_from=2016-01-01&date_to=2016-01-10&origin=nonexistent&destination=nonexistent")
+    assert resp.status_code == 400

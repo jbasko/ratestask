@@ -4,7 +4,9 @@ from flask import Blueprint
 from flask_pydantic import validate
 from pydantic import BaseModel, root_validator
 
+from ratestask.domain.points import get_points
 from ratestask.domain.rates import iter_average_rate_by_day
+from ratestask.exceptions import BadRequest
 
 rates = Blueprint("rates", __name__)
 
@@ -32,6 +34,17 @@ class RatesRequest(BaseModel):
 @rates.route("/rates", methods=["GET"])
 @validate()
 def get_rates(query: RatesRequest):
+    points = get_points({
+        "origin": query.origin,
+        "destination": query.destination,
+    })
+
+    if not points["origin"]:
+        raise BadRequest("origin point does not exist", loc="origin")
+
+    if not points["destination"]:
+        raise BadRequest("destination point does not exist", loc="destination")
+
     return [
         {"day": day.strftime("%Y-%m-%d"), "average_price": average_price}
         for day, average_price in iter_average_rate_by_day(
