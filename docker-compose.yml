@@ -1,0 +1,24 @@
+version: "3"
+
+services:
+
+  db:
+    build:
+      context: ./db-setup
+    ports:
+      - 5432:5432
+
+  api:
+    build: .
+    ports:
+      - 5000:5000
+    environment:
+      - FLASK_APP=ratestask:create_app()
+      - FLASK_DEBUG=1
+      - RATESTASK_DB_DSN="host=db port=5432 dbname=postgres user=postgres password=ratestask"
+    volumes:
+      - .:/app
+    stdin_open: true
+    tty: true
+    depends_on:
+      - db

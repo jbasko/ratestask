@@ -1,7 +1,22 @@
-FROM  postgres:12
+FROM python:3.10-buster
 
-COPY db-setup/010.rates.sql /docker-entrypoint-initdb.d/
-COPY db-setup/020.region_tree_and_points.sql /docker-entrypoint-initdb.d/
+# We don't want to run our application as root if it is not strictly necessary, even in a container.
+# Create a user and a group called 'app' to run the processes.
+# A system user is sufficient and we do not need a home.
+RUN adduser --system --group --no-create-home app
 
-EXPOSE 5432
-ENV POSTGRES_PASSWORD=ratestask
+# Place the application components in a dir below the root dir
+COPY . /app
+
+# Make the directory the working directory for subsequent commands
+WORKDIR /app
+
+# Install from the requirements.txt we copied above
+RUN pip install -r requirements.txt
+
+# Hand everything over to the 'app' user
+RUN chown -R app:app /app
+
+USER app
+
+CMD ["flask", "run", "--host=0.0.0.0"]
