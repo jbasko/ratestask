@@ -34,6 +34,9 @@ class RatesRequest(BaseModel):
 @rates.route("/rates", methods=["GET"])
 @validate()
 def get_rates(query: RatesRequest):
+    if query.origin == query.destination:
+        raise BadRequest("origin and destination must be different", loc="origin")
+
     points = get_points({
         "origin": query.origin,
         "destination": query.destination,

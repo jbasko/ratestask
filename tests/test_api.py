@@ -38,6 +38,17 @@ def test_gets_example_rates(client):
     assert body[9]["average_price"] == 1124
 
 
-def test_nonexistent_points(client):
+def test_errs_on_nonexistent_points(client):
     resp = client.get("/rates?date_from=2016-01-01&date_to=2016-01-10&origin=nonexistent&destination=nonexistent")
+    assert resp.status_code == 400
+
+
+def test_errs_on_same_origin_and_destination(client):
+    resp = client.get("/rates?date_from=2016-01-01&date_to=2016-01-10&origin=CNSGH&destination=CNSGH")
+    assert resp.status_code == 400
+
+
+def test_errs_on_origin_within_destination(client):
+    # TODO Can this be valid? It would have to be any point within destination region that is not the origin?
+    resp = client.get("/rates?date_from=2016-01-01&date_to=2016-01-10&origin=CNSGH&destination=china_main")
     assert resp.status_code == 400
